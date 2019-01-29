@@ -1,3 +1,9 @@
+/*
+ * priority-nav - v1.0.13 | (c) 2018 @gijsroge | MIT license
+ * Repository: https://github.com/gijsroge/priority-navigation.git
+ * Description: Priority+ pattern navigation that hides menu items if they don't fit on screen.
+ * Demo: http://gijsroge.github.io/priority-nav.js/
+ */
 (function (root, factory) {
     if (typeof define === "function" && define.amd) {
         define("priorityNav", factory(root));
@@ -39,6 +45,9 @@
         offsetPixels:               0, // increase to decrease the time it takes to move an item.
         count:                      true, // prints the amount of items are moved to the attribute data-count to style with css counter.
 
+        // Button behavior
+        buttonHandler:              null, // when nothing, apply a default behavior to display the dropdown menu, must be a function(button, _this, settings)
+        
         //Callbacks
         moved: function () {
         },
@@ -487,6 +496,25 @@
     };
 
 
+    /**
+     * Default behavior binded to the menu button, but it can be overloaded in settings
+     */
+    var defaultButtonHandler = function (button, _this, settings) {
+        toggleClass(_this.querySelector(navDropdown), "show");
+        toggleClass(button, "is-open");
+        toggleClass(_this, "is-open");
+
+        /**
+         * Toggle aria hidden for accessibility
+         */
+        if(-1 !== _this.className.indexOf( "is-open" )){
+            _this.querySelector(navDropdown).setAttribute("aria-hidden", "false");
+        }else{
+            _this.querySelector(navDropdown).setAttribute("aria-hidden", "true");
+            _this.querySelector(navDropdown).blur();
+        }
+    }
+
 
     /**
      * Bind eventlisteners
@@ -505,21 +533,9 @@
             }, true);
         }
 
-        // Toggle dropdown
-        _this.querySelector(navDropdownToggle).addEventListener("click", function () {
-            toggleClass(_this.querySelector(navDropdown), "show");
-            toggleClass(this, "is-open");
-            toggleClass(_this, "is-open");
-
-            /**
-             * Toggle aria hidden for accessibility
-             */
-            if(-1 !== _this.className.indexOf( "is-open" )){
-                _this.querySelector(navDropdown).setAttribute("aria-hidden", "false");
-            }else{
-                _this.querySelector(navDropdown).setAttribute("aria-hidden", "true");
-                _this.querySelector(navDropdown).blur();
-            }
+        // Toggle button behavior
+        _this.querySelector(navDropdownToggle).addEventListener("click", function(event) {
+            (settings.buttonHandler || defaultButtonHandler)(this, _this, settings)
         });
 
         /*
